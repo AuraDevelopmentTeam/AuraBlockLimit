@@ -1,7 +1,7 @@
 # [AuraBlockLimit](https://github.com/AuraDevelopmentTeam/AuraBlockLimit)
 
-[![Build Status](https://gitlab.project-creative.de/AuraDev/AuraBlockLimit/badges/master/build.svg)](https://gitlab.project-creative.de/AuraDev/AuraBlockLimit/commits/master)
-[![Coverage Report](https://gitlab.project-creative.de/AuraDev/AuraBlockLimit/badges/master/coverage.svg)](https://gitlab.project-creative.de/AuraDev/AuraBlockLimit/commits/master)
+[![Build Status](https://gitlab.project-creative.de/AuraDev/AuraBlockLimit/badges/master/build.svg)](https://gitlab.project-creative.de/AuraDev/AuraBlockLimit/pipelines)
+[![Coverage Report](https://gitlab.project-creative.de/AuraDev/AuraBlockLimit/badges/master/coverage.svg)](https://gitlab.project-creative.de/AuraDev/AuraBlockLimit/pipelines)
 
 Simple plugin to limit how many of a type of block a player can place
 
