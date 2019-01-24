@@ -3,6 +3,8 @@ package dev.aura.blocklimit;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import dev.aura.blocklimit.config.Config;
+import dev.aura.blocklimit.counter.BlockCounter;
+import dev.aura.blocklimit.event.PlayerEvents;
 import dev.aura.blocklimit.permission.PermissionRegistry;
 import dev.aura.blocklimit.util.database.DataSource;
 import dev.aura.blocklimit.util.metrics.FeatureChart;
@@ -122,8 +124,10 @@ public class AuraBlockLimit {
     }
 
     dataSource = new DataSource();
+    BlockCounter.setDataSource(dataSource);
+    BlockCounter.startTask();
 
-    // addEventListener(new PlayerEvents(dataSource));
+    addEventListener(new PlayerEvents());
     logger.debug("Registered events");
 
     logger.info("Loaded successfully!");
@@ -159,6 +163,9 @@ public class AuraBlockLimit {
 
     removeEventListeners();
     logger.debug("Unregistered events");
+
+    BlockCounter.stopTask();
+    logger.debug("Stopped saving task");
 
     dataSource = null;
     logger.debug("Closed database connection");

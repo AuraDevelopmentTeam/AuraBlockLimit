@@ -231,7 +231,6 @@ public class DataSource {
           .append("), UNIQUE (")
           .append(tableBlocksColumnBlock)
           .append(")) DEFAULT CHARSET=utf8mb4");
-
       createTableBlockCounts
           .append("CREATE TABLE IF NOT EXISTS ")
           .append(tableBlockCounts)
@@ -256,9 +255,9 @@ public class DataSource {
       connection.executeStatement(createTableBlocks.toString());
       connection.executeStatement(createTableBlockCounts.toString());
 
-      AuraBlockLimit.getLogger().debug("Created table");
+      AuraBlockLimit.getLogger().debug("Created tables");
     } catch (SQLException e) {
-      AuraBlockLimit.getLogger().error("Could not create table!", e);
+      AuraBlockLimit.getLogger().error("Could not create tables!", e);
     }
   }
 }

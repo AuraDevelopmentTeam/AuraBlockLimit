@@ -24,7 +24,7 @@ public class Config {
     @Setting(
       comment =
           "Select which language from the lang dir to use.\n"
-              + "You can add your own translations in there. if you name your file \"test.lang\", choose \"test\" here."
+              + "You can add your own translations in there. If you name your file \"test.lang\", choose \"test\" here."
     )
     @Getter
     private String language = "en_US";
@@ -35,6 +35,10 @@ public class Config {
     @Setting(comment = "The stoage engine that should be used\n" + "Allowed values: h2 mysql")
     @Getter
     private StorageEngine storageEngine = StorageEngine.h2;
+
+    @Setting(comment = "The interval in which the counts are saved to storage (in ms)")
+    @Getter
+    private int saveInterval = 10_000;
 
     @Setting(comment = "Settings for the h2 storage engine")
     @Getter
@@ -66,8 +70,8 @@ public class Config {
     public static class H2 {
       @Setting(
         comment =
-            "If this is a relative path, it will be relative to the InvSync config dir (should be \"config/invsync\"). Absolute\n"
-                + "paths work too of course"
+            "If this is a relative path, it will be relative to the AuraBlockLimit config dir (should be \"config/blocklimit\").\n"
+                + "Absolute paths work too of course"
       )
       @Getter
       private String databaseFile = "blockCounts";
