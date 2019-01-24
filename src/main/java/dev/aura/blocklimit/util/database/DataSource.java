@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.Getter;
@@ -20,20 +22,25 @@ import org.spongepowered.api.entity.living.player.Player;
   },
   justification = "The database name needs to be dynamic in order to allow prefixes"
 )
-// TODO: Implement proper data structures
 public class DataSource {
   private final DatabaseConnection connection;
   @Getter private final Config.Storage storageConfig;
 
-  private final String tableInventories;
-  private final String tableInventoriesColumnUUID;
-  private final String tableInventoriesColumnActive;
-  private final String tableInventoriesColumnData;
+  private final String tableBlocks;
+  private final String tableBlocksColumnID;
+  private final String tableBlocksColumnBlock;
 
-  private final String insertInventoryQuery;
-  private final String loadInventoryQuery;
-  private final String setActiveQuery;
-  private final String isActiveQuery;
+  private final String tableBlockCounts;
+  private final String tableBlockCountsColumnUUID;
+  private final String tableBlockCountsColumnBlockID;
+  private final String tableBlockCountsColumnCount;
+
+  private final String getBlockIDSubQuery;
+  private final String getBlockNameSubQuery;
+
+  private final String addBlockQuery;
+  private final String saveBlockCountQuery;
+  private final String getBlockCountsQuery;
 
   public static String getPlayerString(Player player) {
     if (player == null) return "<unknown>";
@@ -57,130 +64,139 @@ public class DataSource {
       connection = new MysqlDatabaseConnection(storageConfig.getMysql());
     } else throw new IllegalArgumentException("Invalid storage Engine!");
 
-    tableInventories = getTableName("inventories");
-    tableInventoriesColumnUUID = "UUID";
-    tableInventoriesColumnActive = "Active";
-    tableInventoriesColumnData = "Data";
+    tableBlocks = getTableName("blocks");
+    tableBlocksColumnID = "ID";
+    tableBlocksColumnBlock = "Block";
 
-    prepareTable();
+    tableBlockCounts = getTableName("blockcounts");
+    tableBlockCountsColumnUUID = "UUID";
+    tableBlockCountsColumnBlockID = "BlockID";
+    tableBlockCountsColumnCount = "Count";
 
-    StringBuilder insertInventoryStr = new StringBuilder();
-    StringBuilder getInventoryStr = new StringBuilder();
-    StringBuilder setActiveStr = new StringBuilder();
-    StringBuilder isActiveStr = new StringBuilder();
+    prepareTables();
 
-    insertInventoryStr
-        .append("REPLACE INTO ")
-        .append(tableInventories)
+    StringBuilder getBlockIDStr = new StringBuilder();
+    StringBuilder getBlockNameStr = new StringBuilder();
+
+    getBlockIDStr
+        .append("SELECT ")
+        .append(tableBlocksColumnID)
+        .append(" FROM ")
+        .append(tableBlocks)
+        .append(" WHERE ")
+        .append(tableBlocksColumnBlock)
+        .append(" = ? LIMIT 1");
+    getBlockNameStr
+        .append("SELECT ")
+        .append(tableBlocksColumnBlock)
+        .append(" FROM ")
+        .append(tableBlocks)
+        .append(" WHERE ")
+        .append(tableBlocksColumnID)
+        .append(" = ")
+        .append(tableBlockCountsColumnBlockID)
+        .append(" LIMIT 1");
+
+    getBlockIDSubQuery = getBlockIDStr.toString();
+    getBlockNameSubQuery = getBlockNameStr.toString();
+
+    StringBuilder addBlockStr = new StringBuilder();
+    StringBuilder saveBlockCountStr = new StringBuilder();
+    StringBuilder getBlockCountsStr = new StringBuilder();
+
+    addBlockStr
+        .append("INSERT IGNORE INTO ")
+        .append(tableBlocks)
         .append(" (")
-        .append(tableInventoriesColumnUUID)
+        .append(tableBlocksColumnBlock)
+        .append(") VALUES (?)");
+    saveBlockCountStr
+        .append("REPLACE INTO ")
+        .append(tableBlockCounts)
+        .append(" (")
+        .append(tableBlockCountsColumnUUID)
         .append(", ")
-        .append(tableInventoriesColumnActive)
+        .append(tableBlockCountsColumnBlockID)
         .append(", ")
-        .append(tableInventoriesColumnData)
-        .append(") VALUES (?, FALSE, ?)");
-    getInventoryStr
-        .append("SELECT ")
-        .append(tableInventoriesColumnData)
+        .append(tableBlockCountsColumnCount)
+        .append(") VALUES (?, (")
+        .append(getBlockIDSubQuery)
+        .append("), ?)");
+    getBlockCountsStr
+        .append("SELECT (")
+        .append(getBlockNameSubQuery)
+        .append(") AS Block, ")
+        .append(tableBlockCountsColumnCount)
         .append(" FROM ")
-        .append(tableInventories)
+        .append(tableBlockCounts)
         .append(" WHERE ")
-        .append(tableInventoriesColumnUUID)
-        .append(" = ? LIMIT 1");
-    setActiveStr
-        .append("UPDATE ")
-        .append(tableInventories)
-        .append(" SET ")
-        .append(tableInventoriesColumnActive)
-        .append(" = TRUE WHERE ")
-        .append(tableInventoriesColumnUUID)
-        .append(" = ? LIMIT 1");
-    isActiveStr
-        .append("SELECT ")
-        .append(tableInventoriesColumnActive)
-        .append(" FROM ")
-        .append(tableInventories)
-        .append(" WHERE ")
-        .append(tableInventoriesColumnUUID)
-        .append(" = ? LIMIT 1");
+        .append(tableBlockCountsColumnUUID)
+        .append(" = ?");
 
-    insertInventoryQuery = insertInventoryStr.toString();
-    loadInventoryQuery = getInventoryStr.toString();
-    setActiveQuery = setActiveStr.toString();
-    isActiveQuery = isActiveStr.toString();
+    addBlockQuery = addBlockStr.toString();
+    saveBlockCountQuery = saveBlockCountStr.toString();
+    getBlockCountsQuery = getBlockCountsStr.toString();
   }
 
-  public void saveInventory(Player player, byte[] data) {
+  public void saveBlockCounts(Player player, Map<String, Integer> blockCounts) {
     String playerName = getPlayerString(player);
 
-    try (PreparedStatement insertInventory = connection.getPreparedStatement(insertInventoryQuery);
-        Connection connection = insertInventory.getConnection()) {
-      AuraBlockLimit.getLogger().debug("Saving inventory for player " + playerName);
+    try (PreparedStatement addBlock = connection.getPreparedStatement(addBlockQuery);
+        PreparedStatement saveBlockCount = connection.getPreparedStatement(saveBlockCountQuery);
+        Connection connection = addBlock.getConnection()) {
+      AuraBlockLimit.getLogger().debug("Saving block counts for player " + playerName);
 
-      insertInventory.setBytes(1, getBytesFromUUID(player.getUniqueId()));
-      insertInventory.setBytes(2, data);
+      byte[] uuid = getBytesFromUUID(player.getUniqueId());
+      String block;
+      int count;
 
-      insertInventory.executeUpdate();
-      insertInventory.clearParameters();
+      for (Map.Entry<String, Integer> entry : blockCounts.entrySet()) {
+        block = entry.getKey();
+        count = entry.getValue();
+
+        addBlock.setString(1, block);
+
+        addBlock.executeUpdate();
+        addBlock.clearParameters();
+
+        saveBlockCount.setBytes(1, uuid);
+        saveBlockCount.setString(2, block);
+        saveBlockCount.setInt(3, count);
+
+        saveBlockCount.executeUpdate();
+        saveBlockCount.clearParameters();
+      }
     } catch (SQLException e) {
       AuraBlockLimit.getLogger().error("Could not save invetory for player " + playerName, e);
     }
   }
 
-  public Optional<byte[]> loadInventory(Player player) {
+  public Optional<Map<String, Integer>> getBlockCounts(Player player) {
     String playerName = getPlayerString(player);
 
-    try (PreparedStatement loadInventory = connection.getPreparedStatement(loadInventoryQuery);
-        Connection connection = loadInventory.getConnection()) {
-      AuraBlockLimit.getLogger().debug("Loading inventory for player " + playerName);
+    try (PreparedStatement getBlockCounts = connection.getPreparedStatement(getBlockCountsQuery);
+        Connection connection = getBlockCounts.getConnection()) {
+      AuraBlockLimit.getLogger().debug("Loading block counts  for player " + playerName);
 
-      loadInventory.setBytes(1, getBytesFromUUID(player.getUniqueId()));
+      getBlockCounts.setBytes(1, getBytesFromUUID(player.getUniqueId()));
 
-      try (ResultSet result = loadInventory.executeQuery()) {
-        loadInventory.clearParameters();
+      try (ResultSet result = getBlockCounts.executeQuery()) {
+        getBlockCounts.clearParameters();
 
-        if (result.next()) return Optional.of(result.getBytes(tableInventoriesColumnData));
-        else return Optional.empty();
+        if (!result.next()) return Optional.empty();
+
+        final Map<String, Integer> resultMap = new HashMap<>();
+
+        do {
+          resultMap.put(result.getString("Block"), result.getInt("Count"));
+        } while (result.next());
+
+        return Optional.of(resultMap);
       }
     } catch (SQLException e) {
       AuraBlockLimit.getLogger().error("Could not load invetory for player " + playerName, e);
 
       return Optional.empty();
-    }
-  }
-
-  public void setActive(Player player) {
-    String playerName = getPlayerString(player);
-
-    try (PreparedStatement setActive = connection.getPreparedStatement(setActiveQuery);
-        Connection connection = setActive.getConnection()) {
-      AuraBlockLimit.getLogger().debug("Set player " + playerName + " active");
-
-      setActive.setBytes(1, getBytesFromUUID(player.getUniqueId()));
-
-      setActive.executeUpdate();
-      setActive.clearParameters();
-    } catch (SQLException e) {
-      AuraBlockLimit.getLogger().error("Could not set player " + playerName + " active", e);
-    }
-  }
-
-  public boolean isActive(Player player) {
-    try (PreparedStatement isActive = connection.getPreparedStatement(isActiveQuery);
-        Connection connection = isActive.getConnection()) {
-      isActive.setBytes(1, getBytesFromUUID(player.getUniqueId()));
-
-      try (ResultSet result = isActive.executeQuery()) {
-        isActive.clearParameters();
-
-        if (result.next()) return result.getBoolean(1);
-        else return false;
-      }
-    } catch (SQLException e) {
-      AuraBlockLimit.getLogger()
-          .error("Could not check if " + getPlayerString(player) + " is active", e);
-
-      return false;
     }
   }
 
@@ -198,24 +214,47 @@ public class DataSource {
     return '`' + name + '`';
   }
 
-  private void prepareTable() {
+  private void prepareTables() {
     try {
-      StringBuilder createTable = new StringBuilder();
+      StringBuilder createTableBlocks = new StringBuilder();
+      StringBuilder createTableBlockCounts = new StringBuilder();
 
-      createTable
+      createTableBlocks
           .append("CREATE TABLE IF NOT EXISTS ")
-          .append(tableInventories)
+          .append(tableBlocks)
           .append(" (")
-          .append(tableInventoriesColumnUUID)
-          .append(" BINARY(16) NOT NULL, ")
-          .append(tableInventoriesColumnActive)
-          .append(" BOOL NOT NULL, ")
-          .append(tableInventoriesColumnData)
-          .append(" MEDIUMBLOB NOT NULL, PRIMARY KEY (")
-          .append(tableInventoriesColumnUUID)
-          .append(")) DEFAULT CHARSET=utf8");
+          .append(tableBlocksColumnID)
+          .append(" INT NOT NULL AUTO_INCREMENT, ")
+          .append(tableBlocksColumnBlock)
+          .append(" VARCHAR(128) NOT NULL, PRIMARY KEY (")
+          .append(tableBlocksColumnID)
+          .append("), UNIQUE (")
+          .append(tableBlocksColumnBlock)
+          .append(")) DEFAULT CHARSET=utf8mb4");
 
-      connection.executeStatement(createTable.toString());
+      createTableBlockCounts
+          .append("CREATE TABLE IF NOT EXISTS ")
+          .append(tableBlockCounts)
+          .append(" (")
+          .append(tableBlockCountsColumnUUID)
+          .append(" BINARY(16) NOT NULL, ")
+          .append(tableBlockCountsColumnBlockID)
+          .append(" INT NOT NULL, ")
+          .append(tableBlockCountsColumnCount)
+          .append(" INT NOT NULL, PRIMARY KEY (")
+          .append(tableBlockCountsColumnUUID)
+          .append(", ")
+          .append(tableBlockCountsColumnBlockID)
+          .append("), FOREIGN KEY (")
+          .append(tableBlockCountsColumnBlockID)
+          .append(") REFERENCES ")
+          .append(tableBlocks)
+          .append('(')
+          .append(tableBlocksColumnID)
+          .append(")) DEFAULT CHARSET=utf8mb4");
+
+      connection.executeStatement(createTableBlocks.toString());
+      connection.executeStatement(createTableBlockCounts.toString());
 
       AuraBlockLimit.getLogger().debug("Created table");
     } catch (SQLException e) {

@@ -1,6 +1,7 @@
 package dev.aura.blocklimit.config;
 
 import dev.aura.blocklimit.AuraBlockLimit;
+import dev.aura.blocklimit.util.database.DatabaseConnection;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -79,14 +80,14 @@ public class Config {
     @ConfigSerializable
     public static class MySQL {
       @Setting @Getter private String host = "localhost";
-      @Setting @Getter private int port = 3306;
-      @Setting @Getter private String database = "invsync";
-      @Setting @Getter private String user = "invsync";
+      @Setting @Getter private int port = DatabaseConnection.DEFAULT_MYSQL_PORT;
+      @Setting @Getter private String database = "blocklimit";
+      @Setting @Getter private String user = "blocklimit";
       @Setting @Getter private String password = "sup3rS3cur3Pa55w0rd!";
 
       @Setting(comment = "Prefix for the plugin tables")
       @Getter
-      private String tablePrefix = "invsync_";
+      private String tablePrefix = "blocklimit_";
     }
   }
 }
