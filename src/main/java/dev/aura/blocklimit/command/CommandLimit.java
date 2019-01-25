@@ -1,6 +1,7 @@
 package dev.aura.blocklimit.command;
 
 import dev.aura.blocklimit.AuraBlockLimit;
+import dev.aura.blocklimit.message.PluginMessages;
 import dev.aura.blocklimit.permission.PermissionRegistry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,7 @@ public class CommandLimit implements CommandExecutor {
                 try {
                   plugin.reload(null);
 
-                  // TODO: show message
+                  src.sendMessage(PluginMessages.ADMIN_REALOAD_SUCCESSFUL.getMessage());
                 } catch (Exception e) {
                   AuraBlockLimit.getLogger().error("Error while reloading the plugin:", e);
                 }

@@ -9,6 +9,8 @@ import dev.aura.blocklimit.event.PlayerEvents;
 import dev.aura.blocklimit.permission.PermissionRegistry;
 import dev.aura.blocklimit.util.database.DataSource;
 import dev.aura.blocklimit.util.metrics.FeatureChart;
+import dev.aura.lib.messagestranslator.MessagesTranslator;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -73,6 +75,7 @@ public class AuraBlockLimit {
   private Path configDir;
 
   @NonNull private Config config;
+  @NonNull private MessagesTranslator translator;
 
   @NonNull private DataSource dataSource;
   private PermissionRegistry permissionRegistry;
@@ -100,6 +103,10 @@ public class AuraBlockLimit {
     return instance.config;
   }
 
+  public static MessagesTranslator getTranslator() {
+    return instance.translator;
+  }
+
   public static DataSource getDataSource() {
     return instance.dataSource;
   }
@@ -108,8 +115,6 @@ public class AuraBlockLimit {
   public void init(GameInitializationEvent event)
       throws SQLException, IOException, ObjectMappingException {
     logger.info("Initializing " + NAME + " Version " + VERSION);
-
-    loadConfig();
 
     if (VERSION.contains("SNAPSHOT")) {
       logger.warn("WARNING! This is a snapshot version!");
@@ -120,10 +125,16 @@ public class AuraBlockLimit {
       logger.info("Things might not work properly!");
     }
 
+    loadConfig();
+
     if (permissionRegistry == null) {
       permissionRegistry = new PermissionRegistry(this);
       logger.debug("Registered permissions");
     }
+
+    translator =
+        new MessagesTranslator(
+            new File(getConfigDir().toFile(), "lang"), config.getGeneral().getLanguage(), this);
 
     dataSource = new DataSource();
     BlockCounter.setDataSource(dataSource);
