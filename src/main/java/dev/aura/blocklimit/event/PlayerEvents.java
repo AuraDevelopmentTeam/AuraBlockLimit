@@ -35,7 +35,9 @@ public class PlayerEvents implements AutoCloseable {
   @Listener
   public void onBlockPlace(ChangeBlockEvent.Place event, @First Player player) {
     for (Transaction<BlockSnapshot> block : event.getTransactions()) {
-      BlockCounter.placeBlock(player, block.getFinal());
+      if (!BlockCounter.placeBlock(player, block.getFinal())) {
+        block.setValid(false);
+      }
     }
   }
 

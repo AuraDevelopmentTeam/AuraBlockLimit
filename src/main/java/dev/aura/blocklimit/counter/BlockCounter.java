@@ -112,19 +112,26 @@ public class BlockCounter {
     savePlayer(player);
   }
 
-  public static void placeBlock(Player player, BlockSnapshot block) {
-    placeBlock(player, block.getState());
+  public static boolean placeBlock(Player player, BlockSnapshot block) {
+    return placeBlock(player, block.getState());
   }
 
-  public static void placeBlock(Player player, BlockState block) {
+  public static boolean placeBlock(Player player, BlockState block) {
     final String type = block.getType().getId();
     final String id = block.getId();
 
-    // TODO: check limits
-    setBlockCount(player, type, getBlockCount(player, type) + 1);
-    setBlockCount(player, id, getBlockCount(player, id) + 1);
+    final int typeCount = getBlockCount(player, type);
+    final int idCount = getBlockCount(player, id);
+
+    if (!(PlayerLimits.canPlaceOneMore(player, type, typeCount)
+        && PlayerLimits.canPlaceOneMore(player, id, idCount))) return false;
+
+    setBlockCount(player, type, typeCount + 1);
+    setBlockCount(player, id, idCount + 1);
 
     savePlayer(player);
+
+    return true;
   }
 
   public static int getBlockCount(Player player, String block) {
