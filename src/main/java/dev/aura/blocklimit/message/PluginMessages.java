@@ -10,7 +10,10 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 
 @RequiredArgsConstructor
 public enum PluginMessages implements Message {
-  ADMIN_REALOAD_SUCCESSFUL("reloadSuccessful");
+  // Admin Messages
+  ADMIN_REALOAD_SUCCESSFUL("reloadSuccessful"),
+  // Error Messages
+  ERROR_NOT_A_PLAYER("notAPlayer");
 
   @Getter private final String stringPath;
 

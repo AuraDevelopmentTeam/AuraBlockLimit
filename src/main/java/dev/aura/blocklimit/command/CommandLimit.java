@@ -14,6 +14,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -42,7 +43,9 @@ public class CommandLimit implements CommandExecutor {
   @Override
   public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
     if (args.hasAny(PARAM_RELOAD)) {
-      if (!src.hasPermission(RELOAD_PERMISSION)) throw new CommandPermissionException();
+      if (!src.hasPermission(RELOAD_PERMISSION)) {
+        throw new CommandPermissionException();
+      }
 
       Sponge.getScheduler()
           .createTaskBuilder()
@@ -59,7 +62,11 @@ public class CommandLimit implements CommandExecutor {
               })
           .submit(plugin);
     } else {
-      if (!src.hasPermission(SHOW_PERMISSION)) throw new CommandPermissionException();
+      if (!src.hasPermission(SHOW_PERMISSION)) {
+        throw new CommandPermissionException();
+      } else if (!(src instanceof Player)) {
+        throw new CommandException(PluginMessages.ERROR_NOT_A_PLAYER.getMessage());
+      }
       // TODO
     }
 

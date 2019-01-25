@@ -31,3 +31,8 @@ inherit: en_US
 # Admin Messages
 ####################################################################################################
 reloadSuccessful: "&aAuraBlockLimit erfolgreich neu geladen!"
+
+####################################################################################################
+# Error Messages
+####################################################################################################
+notAPlayer: "&cDu musst ein Spieler sein, um diesen Befehl ausführen zu können!"
