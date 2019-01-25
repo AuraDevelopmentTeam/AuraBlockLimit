@@ -2,6 +2,7 @@ package dev.aura.blocklimit;
 
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+import dev.aura.blocklimit.command.CommandLimit;
 import dev.aura.blocklimit.config.Config;
 import dev.aura.blocklimit.counter.BlockCounter;
 import dev.aura.blocklimit.event.PlayerEvents;
@@ -23,6 +24,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.bstats.sponge.Metrics2;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
@@ -127,6 +129,8 @@ public class AuraBlockLimit {
     BlockCounter.setDataSource(dataSource);
     BlockCounter.startTask();
 
+    CommandLimit.register(this);
+
     addEventListener(new PlayerEvents());
     logger.debug("Registered events");
 
@@ -160,6 +164,9 @@ public class AuraBlockLimit {
   @Listener
   public void stop(GameStoppingEvent event) throws Exception {
     logger.info("Shutting down " + NAME + " Version " + VERSION);
+
+    removeCommands();
+    logger.debug("Unregistered commands");
 
     removeEventListeners();
     logger.debug("Unregistered events");
@@ -218,6 +225,12 @@ public class AuraBlockLimit {
     eventListeners.add(listener);
 
     Sponge.getEventManager().registerListeners(this, listener);
+  }
+
+  private void removeCommands() {
+    final CommandManager commandManager = Sponge.getCommandManager();
+
+    commandManager.getOwnedBy(this).forEach(commandManager::removeMapping);
   }
 
   private void removeEventListeners() throws Exception {

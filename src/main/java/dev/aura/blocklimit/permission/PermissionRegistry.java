@@ -1,6 +1,7 @@
 package dev.aura.blocklimit.permission;
 
 import dev.aura.blocklimit.AuraBlockLimit;
+import dev.aura.blocklimit.command.CommandLimit;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.spongepowered.api.Sponge;
@@ -21,6 +22,18 @@ public class PermissionRegistry {
   public void registerPermissions() {
     registerPermission(BASE, PermissionDescription.ROLE_ADMIN);
     registerPermission(COMMAND, "Permission for all commands", PermissionDescription.ROLE_ADMIN);
+    registerPermission(
+        CommandLimit.BASE_PERMISSION,
+        "Permission for the \"/limit\" command and all subcommands",
+        PermissionDescription.ROLE_ADMIN);
+    registerPermission(
+        CommandLimit.SHOW_PERMISSION,
+        "Permission for just the \"/limit\" command",
+        PermissionDescription.ROLE_USER);
+    registerPermission(
+        CommandLimit.RELOAD_PERMISSION,
+        "Permission for the \"/limit reload\" command",
+        PermissionDescription.ROLE_ADMIN);
   }
 
   private Builder getBuilder() {
