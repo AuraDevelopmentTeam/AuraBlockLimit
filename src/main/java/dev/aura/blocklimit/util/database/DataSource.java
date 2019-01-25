@@ -38,6 +38,7 @@ public class DataSource {
   private final String getBlockIDSubQuery;
   private final String getBlockNameSubQuery;
 
+  private final String getBlockQuery;
   private final String addBlockQuery;
   private final String saveBlockCountQuery;
   private final String getBlockCountsQuery;
@@ -100,12 +101,19 @@ public class DataSource {
     getBlockIDSubQuery = getBlockIDStr.toString();
     getBlockNameSubQuery = getBlockNameStr.toString();
 
+    StringBuilder getBlockStr = new StringBuilder();
     StringBuilder addBlockStr = new StringBuilder();
     StringBuilder saveBlockCountStr = new StringBuilder();
     StringBuilder getBlockCountsStr = new StringBuilder();
 
+    getBlockStr
+        .append("SELECT 1 FROM ")
+        .append(tableBlocks)
+        .append(" WHERE ")
+        .append(tableBlocksColumnBlock)
+        .append("= ? LIMIT 1");
     addBlockStr
-        .append("INSERT IGNORE INTO ")
+        .append("INSERT INTO ")
         .append(tableBlocks)
         .append(" (")
         .append(tableBlocksColumnBlock)
@@ -133,6 +141,7 @@ public class DataSource {
         .append(tableBlockCountsColumnUUID)
         .append(" = ?");
 
+    getBlockQuery = getBlockStr.toString();
     addBlockQuery = addBlockStr.toString();
     saveBlockCountQuery = saveBlockCountStr.toString();
     getBlockCountsQuery = getBlockCountsStr.toString();
@@ -141,9 +150,12 @@ public class DataSource {
   public void saveBlockCounts(Player player, Map<String, Integer> blockCounts) {
     String playerName = getPlayerString(player);
 
-    try (PreparedStatement addBlock = connection.getPreparedStatement(addBlockQuery);
+    try (PreparedStatement getBlock = connection.getPreparedStatement(getBlockQuery);
+        PreparedStatement addBlock = connection.getPreparedStatement(addBlockQuery);
         PreparedStatement saveBlockCount = connection.getPreparedStatement(saveBlockCountQuery);
-        Connection connection = addBlock.getConnection()) {
+        Connection connectionGetBlock = getBlock.getConnection();
+        Connection connectionAddBlock = addBlock.getConnection();
+        Connection connectionSaveBlockCount = saveBlockCount.getConnection()) {
       AuraBlockLimit.getLogger().debug("Saving block counts for player " + playerName);
 
       byte[] uuid = getBytesFromUUID(player.getUniqueId());
@@ -154,17 +166,25 @@ public class DataSource {
         block = entry.getKey();
         count = entry.getValue();
 
-        addBlock.setString(1, block);
+        getBlock.setString(1, block);
 
-        addBlock.executeUpdate();
-        addBlock.clearParameters();
+        try (ResultSet result = getBlock.executeQuery()) {
+          getBlock.clearParameters();
 
-        saveBlockCount.setBytes(1, uuid);
-        saveBlockCount.setString(2, block);
-        saveBlockCount.setInt(3, count);
+          if (!result.next()) {
+            addBlock.setString(1, block);
 
-        saveBlockCount.executeUpdate();
-        saveBlockCount.clearParameters();
+            addBlock.executeUpdate();
+            addBlock.clearParameters();
+          }
+
+          saveBlockCount.setBytes(1, uuid);
+          saveBlockCount.setString(2, block);
+          saveBlockCount.setInt(3, count);
+
+          saveBlockCount.executeUpdate();
+          saveBlockCount.clearParameters();
+        }
       }
     } catch (SQLException e) {
       AuraBlockLimit.getLogger().error("Could not save invetory for player " + playerName, e);

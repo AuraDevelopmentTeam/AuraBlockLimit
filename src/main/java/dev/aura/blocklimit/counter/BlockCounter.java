@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import lombok.Setter;
 import lombok.experimental.UtilityClass;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
@@ -97,11 +98,50 @@ public class BlockCounter {
     savingPlayers.forEach(player -> savePlayerNow(player, false));
   }
 
+  public static void breakBlock(Player player, BlockSnapshot block) {
+    breakBlock(player, block.getState());
+  }
+
   public static void breakBlock(Player player, BlockState block) {
-    block.getId();
+    final String type = block.getType().getId();
+    final String id = block.getId();
+
+    setBlockCount(player, type, Math.max(0, getBlockCount(player, type) - 1));
+    setBlockCount(player, id, Math.max(0, getBlockCount(player, id) - 1));
+
+    savePlayer(player);
+  }
+
+  public static void placeBlock(Player player, BlockSnapshot block) {
+    placeBlock(player, block.getState());
   }
 
   public static void placeBlock(Player player, BlockState block) {
-    block.getId();
+    final String type = block.getType().getId();
+    final String id = block.getId();
+
+    // TODO: check limits
+    setBlockCount(player, type, getBlockCount(player, type) + 1);
+    setBlockCount(player, id, getBlockCount(player, id) + 1);
+
+    savePlayer(player);
+  }
+
+  public static int getBlockCount(Player player, String block) {
+    return getBlockCount(player.getUniqueId(), block);
+  }
+
+  public static int getBlockCount(UUID uuid, String block) {
+    return playerBlockCounts
+        .computeIfAbsent(uuid, x -> new HashMap<>())
+        .computeIfAbsent(block, x -> 0);
+  }
+
+  public static void setBlockCount(Player player, String block, int count) {
+    setBlockCount(player.getUniqueId(), block, count);
+  }
+
+  public static void setBlockCount(UUID uuid, String block, int count) {
+    playerBlockCounts.computeIfAbsent(uuid, x -> new HashMap<>()).put(block, count);
   }
 }
