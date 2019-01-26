@@ -1,3 +1,9 @@
+Version 1.0.1
+-------------
+
+\+ Allow customization of the pagination headers and footers through the language file.  
+
+
 Version 1.0.0
 -------------
 
