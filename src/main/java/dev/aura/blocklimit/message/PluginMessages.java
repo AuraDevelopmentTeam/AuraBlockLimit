@@ -23,6 +23,7 @@ public enum PluginMessages implements Message {
     return getMessage(null);
   }
 
+  // TODO: Add cache for replacements (string additions are expensive)
   public Text getMessage(Map<String, String> replacements) {
     String message = AuraBlockLimit.getTranslator().translateWithFallback(this);
 

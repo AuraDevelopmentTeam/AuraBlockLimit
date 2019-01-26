@@ -36,6 +36,15 @@ public class Config {
     @Getter
     private StorageEngine storageEngine = StorageEngine.h2;
 
+    @Setting(
+      comment =
+          "If this is true blocks that do not have a limit set at all will not be stored in the database. You can still manually\n"
+              + "make this plugin ignore blocks by setting the limit to -2 (which means unlimited and dont't store) instead of just -1\n"
+              + "(which means unlimited)"
+    )
+    @Getter
+    private boolean ignoreUnset = true;
+
     @Setting(comment = "The interval in which the counts are saved to storage (in ms)")
     @Getter
     private int saveInterval = 10_000;

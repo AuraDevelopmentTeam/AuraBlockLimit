@@ -106,10 +106,13 @@ public class BlockCounter {
     final String type = block.getType().getId();
     final String id = block.getId();
 
-    setBlockCount(player, type, Math.max(0, getBlockCount(player, type) - 1));
-    setBlockCount(player, id, Math.max(0, getBlockCount(player, id) - 1));
+    final boolean storeType = PlayerLimits.shouldStore(player, type);
+    final boolean storeId = PlayerLimits.shouldStore(player, id);
 
-    savePlayer(player);
+    if (storeType) setBlockCount(player, type, Math.max(0, getBlockCount(player, type) - 1));
+    if (storeId) setBlockCount(player, id, Math.max(0, getBlockCount(player, id) - 1));
+
+    if (storeType || storeId) savePlayer(player);
   }
 
   public static boolean placeBlock(Player player, BlockSnapshot block) {
@@ -126,10 +129,13 @@ public class BlockCounter {
     if (!(PlayerLimits.canPlaceOneMore(player, type, typeCount)
         && PlayerLimits.canPlaceOneMore(player, id, idCount))) return false;
 
-    setBlockCount(player, type, typeCount + 1);
-    setBlockCount(player, id, idCount + 1);
+    final boolean storeType = PlayerLimits.shouldStore(player, type);
+    final boolean storeId = PlayerLimits.shouldStore(player, id);
 
-    savePlayer(player);
+    if (storeType) setBlockCount(player, type, typeCount + 1);
+    if (storeId) setBlockCount(player, id, idCount + 1);
+
+    if (storeType || storeId) savePlayer(player);
 
     return true;
   }
