@@ -38,3 +38,8 @@ reloadNotSuccessful: "&cFehler beim Neuladen des Plugins: %error%\n&cEine detail
 ####################################################################################################
 notAPlayer: "&cDu musst ein Spieler sein, um diesen Befehl ausführen zu können!"
 noBlockInHand: "&cDu hast keinen Block in deiner Hand!"
+
+####################################################################################################
+# Limit Messages
+####################################################################################################
+limitReached: "&cDu hast deine Grenze von %limit% für %block% erreicht."

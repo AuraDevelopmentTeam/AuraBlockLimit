@@ -38,3 +38,8 @@ reloadNotSuccessful: "&cError while reloading the plugin: %error%\n&cSee console
 ####################################################################################################
 notAPlayer: "&cYou must be a player to execute this command!"
 noBlockInHand: "&cYou don't have a block in your hand!"
+
+####################################################################################################
+# Limit Messages
+####################################################################################################
+limitReached: "&cYou have reached your limit of %limit% for %block%."

@@ -15,7 +15,9 @@ public enum PluginMessages implements Message {
   ADMIN_REALOAD_NOT_SUCCESSFUL("reloadNotSuccessful"),
   // Error Messages
   ERROR_NOT_A_PLAYER("notAPlayer"),
-  ERROR_NNO_BLOCK_IN_HAND("noBlockInHand");
+  ERROR_NNO_BLOCK_IN_HAND("noBlockInHand"),
+  // Limit Messages
+  LIMIT_LIMIT_REACHED("limitReached");
 
   @Getter private final String stringPath;
 

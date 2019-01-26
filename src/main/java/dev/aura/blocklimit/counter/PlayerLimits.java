@@ -22,12 +22,6 @@ public class PlayerLimits {
             () -> AuraBlockLimit.getConfig().getStorage().getIgnoreUnset() ? IGNORE : UNLIMITED);
   }
 
-  public static boolean canPlaceOneMore(Player player, String block, int currentCount) {
-    final int limit = getLimit(player, block);
-
-    return (limit <= UNLIMITED) ? true : (currentCount < limit);
-  }
-
   public static boolean shouldStore(Player player, String block) {
     final int limit = getLimit(player, block);
 

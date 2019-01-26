@@ -1,6 +1,8 @@
 package dev.aura.blocklimit.counter;
 
+import com.google.common.collect.ImmutableMap;
 import dev.aura.blocklimit.AuraBlockLimit;
+import dev.aura.blocklimit.message.PluginMessages;
 import dev.aura.blocklimit.util.database.DataSource;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.chat.ChatTypes;
 
 @UtilityClass
 public class BlockCounter {
@@ -126,11 +129,19 @@ public class BlockCounter {
     final int typeCount = getBlockCount(player, type);
     final int idCount = getBlockCount(player, id);
 
-    if (!(PlayerLimits.canPlaceOneMore(player, type, typeCount)
-        && PlayerLimits.canPlaceOneMore(player, id, idCount))) return false;
+    final int typeLimit = PlayerLimits.getLimit(player, type);
+    final int idLimit = PlayerLimits.getLimit(player, id);
 
-    final boolean storeType = PlayerLimits.shouldStore(player, type);
-    final boolean storeId = PlayerLimits.shouldStore(player, id);
+    if (!canPlaceOneMore(player, type, typeLimit, typeCount)) {
+      showLimitMessage(player, type, typeLimit);
+      return false;
+    } else if (!canPlaceOneMore(player, id, idLimit, idCount)) {
+      showLimitMessage(player, id, idLimit);
+      return false;
+    }
+
+    final boolean storeType = typeLimit > PlayerLimits.IGNORE;
+    final boolean storeId = idLimit > PlayerLimits.IGNORE;
 
     if (storeType) setBlockCount(player, type, typeCount + 1);
     if (storeId) setBlockCount(player, id, idCount + 1);
@@ -156,5 +167,16 @@ public class BlockCounter {
 
   public static void setBlockCount(UUID uuid, String block, int count) {
     playerBlockCounts.computeIfAbsent(uuid, x -> new HashMap<>()).put(block, count);
+  }
+
+  private static boolean canPlaceOneMore(Player player, String block, int limit, int currentCount) {
+    return (limit <= PlayerLimits.UNLIMITED) ? true : (currentCount < limit);
+  }
+
+  private static void showLimitMessage(Player player, String block, int limit) {
+    player.sendMessage(
+        ChatTypes.ACTION_BAR,
+        PluginMessages.LIMIT_LIMIT_REACHED.getMessage(
+            ImmutableMap.of("limit", Integer.toString(limit), "block", block)));
   }
 }
