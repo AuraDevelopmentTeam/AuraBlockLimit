@@ -29,15 +29,8 @@ public enum PluginMessages implements Message {
     return getMessage(null);
   }
 
-  // TODO: Add cache for replacements (string additions are expensive)
   public Text getMessage(Map<String, String> replacements) {
-    String message = AuraBlockLimit.getTranslator().translateWithFallback(this);
-
-    if (replacements != null) {
-      for (Map.Entry<String, String> replacement : replacements.entrySet()) {
-        message = message.replaceAll('%' + replacement.getKey() + '%', replacement.getValue());
-      }
-    }
+    final String message = AuraBlockLimit.getTranslator().translateWithFallback(this, replacements);
 
     return TextSerializers.FORMATTING_CODE.deserialize(message);
   }
