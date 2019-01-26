@@ -2,11 +2,18 @@ package dev.aura.blocklimit.command;
 
 import com.google.common.collect.ImmutableMap;
 import dev.aura.blocklimit.AuraBlockLimit;
+import dev.aura.blocklimit.counter.BlockCounter;
+import dev.aura.blocklimit.counter.PlayerLimits;
 import dev.aura.blocklimit.message.PluginMessages;
 import dev.aura.blocklimit.permission.PermissionRegistry;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
@@ -17,6 +24,9 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -74,9 +84,66 @@ public class CommandLimit implements CommandExecutor {
       }
 
       final Player player = (Player) src;
+      final Optional<BlockState> blockState =
+          player
+              .getItemInHand(HandTypes.MAIN_HAND)
+              .filter(((Predicate<ItemStack>) ItemStack::isEmpty).negate())
+              .map(ItemStack::getType)
+              .flatMap(ItemType::getBlock)
+              .map(BlockType::getDefaultState);
 
-      player.getItemInHand(HandTypes.MAIN_HAND);
-      // TODO
+      if (!blockState.isPresent()) {
+        throw new CommandException(PluginMessages.ERROR_NNO_BLOCK_IN_HAND.getMessage());
+      }
+
+      final BlockState block = blockState.get();
+      final String type = block.getType().getId();
+      final String id = block.getId();
+
+      final int typeCount = BlockCounter.getBlockCount(player, type);
+      final int idCount = BlockCounter.getBlockCount(player, id);
+
+      final int typeLimit = PlayerLimits.getLimit(player, type);
+      final int idLimit = PlayerLimits.getLimit(player, id);
+
+      Map<String, String> replacements = null;
+
+      if (typeLimit > PlayerLimits.UNLIMITED) {
+        replacements =
+            ImmutableMap.of(
+                "block",
+                type,
+                "limit",
+                Integer.toString(typeLimit),
+                "count",
+                Integer.toString(typeCount),
+                "remaining",
+                Integer.toString(typeLimit - typeCount));
+      } else if (idLimit > PlayerLimits.UNLIMITED) {
+        replacements =
+            ImmutableMap.of(
+                "block",
+                id,
+                "limit",
+                Integer.toString(idLimit),
+                "count",
+                Integer.toString(idCount),
+                "remaining",
+                Integer.toString(idLimit - idCount));
+      }
+
+      Text title;
+      Text message;
+
+      if (replacements != null) {
+        title = PluginMessages.LIMIT_BLOCK_STATS_TITLE.getMessage(replacements);
+        message = PluginMessages.LIMIT_BLOCK_STATS.getMessage(replacements);
+      } else {
+        title = Text.EMPTY;
+        message = PluginMessages.LIMIT_NO_LIMIT.getMessage(ImmutableMap.of("block", id));
+      }
+
+      PaginationList.builder().title(title).contents(message).sendTo(player);
     }
 
     return CommandResult.success();

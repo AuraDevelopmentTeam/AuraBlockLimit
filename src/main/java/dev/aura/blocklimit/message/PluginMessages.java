@@ -17,7 +17,10 @@ public enum PluginMessages implements Message {
   ERROR_NOT_A_PLAYER("notAPlayer"),
   ERROR_NNO_BLOCK_IN_HAND("noBlockInHand"),
   // Limit Messages
-  LIMIT_LIMIT_REACHED("limitReached");
+  LIMIT_LIMIT_REACHED("limitReached"),
+  LIMIT_BLOCK_STATS_TITLE("blockStatsTitle"),
+  LIMIT_BLOCK_STATS("blockStats"),
+  LIMIT_NO_LIMIT("noLimit");
 
   @Getter private final String stringPath;
 
