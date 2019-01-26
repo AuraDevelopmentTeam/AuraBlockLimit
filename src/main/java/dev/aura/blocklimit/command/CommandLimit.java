@@ -1,5 +1,6 @@
 package dev.aura.blocklimit.command;
 
+import com.google.common.collect.ImmutableMap;
 import dev.aura.blocklimit.AuraBlockLimit;
 import dev.aura.blocklimit.message.PluginMessages;
 import dev.aura.blocklimit.permission.PermissionRegistry;
@@ -14,6 +15,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
@@ -58,6 +60,9 @@ public class CommandLimit implements CommandExecutor {
                   src.sendMessage(PluginMessages.ADMIN_REALOAD_SUCCESSFUL.getMessage());
                 } catch (Exception e) {
                   AuraBlockLimit.getLogger().error("Error while reloading the plugin:", e);
+                  src.sendMessage(
+                      PluginMessages.ADMIN_REALOAD_NOT_SUCCESSFUL.getMessage(
+                          ImmutableMap.of("error", e.getMessage())));
                 }
               })
           .submit(plugin);
@@ -67,6 +72,10 @@ public class CommandLimit implements CommandExecutor {
       } else if (!(src instanceof Player)) {
         throw new CommandException(PluginMessages.ERROR_NOT_A_PLAYER.getMessage());
       }
+
+      final Player player = (Player) src;
+
+      player.getItemInHand(HandTypes.MAIN_HAND);
       // TODO
     }
 

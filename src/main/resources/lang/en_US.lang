@@ -31,8 +31,10 @@
 # Admin Messages
 ####################################################################################################
 reloadSuccessful: "&aAuraBlockLimit reloaded successfully!"
+reloadNotSuccessful: "&cError while reloading the plugin: %error%\n&cSee console for a more detailed error message.\n&cThe plugin may be in a severely corrupted state. It's best to restart the server!"
 
 ####################################################################################################
 # Error Messages
 ####################################################################################################
 notAPlayer: "&cYou must be a player to execute this command!"
+noBlockInHand: "&cYou don't have a block in your hand!"

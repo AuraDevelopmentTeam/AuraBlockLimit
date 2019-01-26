@@ -12,8 +12,10 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 public enum PluginMessages implements Message {
   // Admin Messages
   ADMIN_REALOAD_SUCCESSFUL("reloadSuccessful"),
+  ADMIN_REALOAD_NOT_SUCCESSFUL("reloadNotSuccessful"),
   // Error Messages
-  ERROR_NOT_A_PLAYER("notAPlayer");
+  ERROR_NOT_A_PLAYER("notAPlayer"),
+  ERROR_NNO_BLOCK_IN_HAND("noBlockInHand");
 
   @Getter private final String stringPath;
 
