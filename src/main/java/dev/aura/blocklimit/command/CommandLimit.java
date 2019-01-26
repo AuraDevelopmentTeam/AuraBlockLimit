@@ -38,6 +38,11 @@ public class CommandLimit implements CommandExecutor {
   private static final String PARAM_RELOAD = "reload";
 
   private final AuraBlockLimit plugin;
+  private final Text padding;
+
+  private CommandLimit(AuraBlockLimit plugin) {
+    this(plugin, PluginMessages.LIMIT_BLOCK_STATS_PADDING.getMessage());
+  }
 
   public static void register(AuraBlockLimit plugin) {
     CommandSpec realTime =
@@ -143,7 +148,7 @@ public class CommandLimit implements CommandExecutor {
         message = PluginMessages.LIMIT_NO_LIMIT.getMessage(ImmutableMap.of("block", id));
       }
 
-      PaginationList.builder().title(title).contents(message).sendTo(player);
+      PaginationList.builder().padding(padding).title(title).contents(message).sendTo(player);
     }
 
     return CommandResult.success();

@@ -43,6 +43,7 @@ noBlockInHand: "&cDu hast keinen Block in deiner Hand!"
 # Limit Messages
 ####################################################################################################
 limitReached: "&cDu hast deine Grenze von %limit% für %block% erreicht."
+blockStatsPadding: "&f="
 blockStatsTitle: "Limit-Informationen für %block%"
 blockStats: "&6Limit: %limit%\n&6Platziert: %count%\n&6Verbleibend: %remaining%"
 noLimit: "&aDu hast kein Limit für %block%!"
