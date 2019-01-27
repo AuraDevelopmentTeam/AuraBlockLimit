@@ -158,7 +158,7 @@ public class DataSource {
         Connection connectionSaveBlockCount = saveBlockCount.getConnection()) {
       AuraBlockLimit.getLogger().debug("Saving block counts for player " + playerName);
 
-      byte[] uuid = getBytesFromUUID(player.getUniqueId());
+      final byte[] uuid = getBytesFromUUID(player.getUniqueId());
       String block;
       int count;
 

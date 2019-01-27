@@ -156,6 +156,7 @@ public class BlockCounter {
   }
 
   public static Map<String, Integer> getBlockCounts(UUID uuid) {
+    // Insert of generated value intended
     return playerBlockCounts.computeIfAbsent(uuid, x -> new HashMap<>());
   }
 
@@ -164,7 +165,8 @@ public class BlockCounter {
   }
 
   public static int getBlockCount(UUID uuid, String block) {
-    return getBlockCounts(uuid).computeIfAbsent(block, x -> 0);
+    // Don't insert new value
+    return getBlockCounts(uuid).getOrDefault(block, 0);
   }
 
   public static void setBlockCount(Player player, String block, int count) {
