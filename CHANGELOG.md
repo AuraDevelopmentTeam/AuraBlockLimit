@@ -1,3 +1,9 @@
+Version 1.0.3
+-------------
+
+\* Fixed counts being recorded when they shouldn't (Fixes [#2](https://github.com/AuraDevelopmentTeam/AuraBlockLimit/issues/2s)).  
+
+
 Version 1.0.2
 -------------
 
