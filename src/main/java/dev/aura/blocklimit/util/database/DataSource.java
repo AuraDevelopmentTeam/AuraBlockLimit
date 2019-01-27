@@ -28,6 +28,7 @@ public class DataSource {
 
   private final String tableBlocks;
   private final String tableBlocksColumnID;
+  private final String tableBlocksColumnBlockHash;
   private final String tableBlocksColumnBlock;
 
   private final String tableBlockCounts;
@@ -67,6 +68,7 @@ public class DataSource {
 
     tableBlocks = getTableName("blocks");
     tableBlocksColumnID = "ID";
+    tableBlocksColumnBlockHash = "BlockHash";
     tableBlocksColumnBlock = "Block";
 
     tableBlockCounts = getTableName("blockcounts");
@@ -85,6 +87,8 @@ public class DataSource {
         .append(" FROM ")
         .append(tableBlocks)
         .append(" WHERE ")
+        .append(tableBlocksColumnBlockHash)
+        .append(" = ? AND ")
         .append(tableBlocksColumnBlock)
         .append(" = ? LIMIT 1");
     getBlockNameStr
@@ -110,14 +114,18 @@ public class DataSource {
         .append("SELECT 1 FROM ")
         .append(tableBlocks)
         .append(" WHERE ")
+        .append(tableBlocksColumnBlockHash)
+        .append(" = ? AND ")
         .append(tableBlocksColumnBlock)
-        .append("= ? LIMIT 1");
+        .append(" = ? LIMIT 1");
     addBlockStr
         .append("INSERT INTO ")
         .append(tableBlocks)
         .append(" (")
+        .append(tableBlocksColumnBlockHash)
+        .append(", ")
         .append(tableBlocksColumnBlock)
-        .append(") VALUES (?)");
+        .append(") VALUES (?, ?)");
     saveBlockCountStr
         .append("REPLACE INTO ")
         .append(tableBlockCounts)
@@ -166,21 +174,24 @@ public class DataSource {
         block = entry.getKey();
         count = entry.getValue();
 
-        getBlock.setString(1, block);
+        getBlock.setInt(1, block.hashCode());
+        getBlock.setString(2, block);
 
         try (ResultSet result = getBlock.executeQuery()) {
           getBlock.clearParameters();
 
           if (!result.next()) {
-            addBlock.setString(1, block);
+            addBlock.setInt(1, block.hashCode());
+            addBlock.setString(2, block);
 
             addBlock.executeUpdate();
             addBlock.clearParameters();
           }
 
           saveBlockCount.setBytes(1, uuid);
-          saveBlockCount.setString(2, block);
-          saveBlockCount.setInt(3, count);
+          saveBlockCount.setInt(2, block.hashCode());
+          saveBlockCount.setString(3, block);
+          saveBlockCount.setInt(4, count);
 
           saveBlockCount.executeUpdate();
           saveBlockCount.clearParameters();
@@ -239,18 +250,26 @@ public class DataSource {
       StringBuilder createTableBlocks = new StringBuilder();
       StringBuilder createTableBlockCounts = new StringBuilder();
 
+      // h2 and MySQL need slightly different tables
       createTableBlocks
           .append("CREATE TABLE IF NOT EXISTS ")
           .append(tableBlocks)
           .append(" (")
           .append(tableBlocksColumnID)
           .append(" INT NOT NULL AUTO_INCREMENT, ")
+          .append(tableBlocksColumnBlockHash)
+          .append(" INT NOT NULL, ")
           .append(tableBlocksColumnBlock)
-          .append(" TEXT NOT NULL, PRIMARY KEY (")
+          .append(' ')
+          .append(storageConfig.isH2() ? "VARCHAR(65535)" : "TEXT")
+          .append(" NOT NULL, PRIMARY KEY (")
           .append(tableBlocksColumnID)
           .append("), UNIQUE (")
+          .append(tableBlocksColumnBlockHash)
+          .append(", ")
           .append(tableBlocksColumnBlock)
-          .append("(128))) DEFAULT CHARSET=utf8mb4");
+          .append(storageConfig.isH2() ? "" : "(128)")
+          .append(")) DEFAULT CHARSET=utf8mb4");
       createTableBlockCounts
           .append("CREATE TABLE IF NOT EXISTS ")
           .append(tableBlockCounts)
