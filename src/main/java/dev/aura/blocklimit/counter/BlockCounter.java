@@ -76,7 +76,7 @@ public class BlockCounter {
   private static void savePlayerNow(Player player, boolean removeData) {
     final UUID uuid = player.getUniqueId();
 
-    dataSource.saveBlockCounts(player, playerBlockCounts.get(uuid));
+    dataSource.saveBlockCounts(player, getBlockCounts(uuid));
 
     if (removeData) {
       playerBlockCounts.remove(uuid);
@@ -151,14 +151,20 @@ public class BlockCounter {
     return true;
   }
 
+  public static Map<String, Integer> getBlockCounts(Player player) {
+    return getBlockCounts(player.getUniqueId());
+  }
+
+  public static Map<String, Integer> getBlockCounts(UUID uuid) {
+    return playerBlockCounts.computeIfAbsent(uuid, x -> new HashMap<>());
+  }
+
   public static int getBlockCount(Player player, String block) {
     return getBlockCount(player.getUniqueId(), block);
   }
 
   public static int getBlockCount(UUID uuid, String block) {
-    return playerBlockCounts
-        .computeIfAbsent(uuid, x -> new HashMap<>())
-        .computeIfAbsent(block, x -> 0);
+    return getBlockCounts(uuid).computeIfAbsent(block, x -> 0);
   }
 
   public static void setBlockCount(Player player, String block, int count) {
@@ -166,7 +172,7 @@ public class BlockCounter {
   }
 
   public static void setBlockCount(UUID uuid, String block, int count) {
-    playerBlockCounts.computeIfAbsent(uuid, x -> new HashMap<>()).put(block, count);
+    getBlockCounts(uuid).put(block, count);
   }
 
   private static boolean canPlaceOneMore(Player player, String block, int limit, int currentCount) {

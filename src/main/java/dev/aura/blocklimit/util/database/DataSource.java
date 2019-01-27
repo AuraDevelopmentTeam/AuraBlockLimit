@@ -214,7 +214,7 @@ public class DataSource {
         return Optional.of(resultMap);
       }
     } catch (SQLException e) {
-      AuraBlockLimit.getLogger().error("Could not load invetory for player " + playerName, e);
+      AuraBlockLimit.getLogger().error("Could not load block counts for player " + playerName, e);
 
       return Optional.empty();
     }
