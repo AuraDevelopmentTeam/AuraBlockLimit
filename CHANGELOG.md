@@ -1,3 +1,11 @@
+Version 1.0.2
+-------------
+
+\* Fixed NPEs when a player hasn't had any block counts saved (Fixes [#1](https://github.com/AuraDevelopmentTeam/AuraBlockLimit/issues/1)).  
+\* Fixed potential issue with inherit loops in translation files.  
+\* Improved placeholder performance.  
+
+
 Version 1.0.1
 -------------
 
