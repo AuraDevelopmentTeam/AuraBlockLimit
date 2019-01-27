@@ -246,11 +246,11 @@ public class DataSource {
           .append(tableBlocksColumnID)
           .append(" INT NOT NULL AUTO_INCREMENT, ")
           .append(tableBlocksColumnBlock)
-          .append(" VARCHAR(128) NOT NULL, PRIMARY KEY (")
+          .append(" TEXT NOT NULL, PRIMARY KEY (")
           .append(tableBlocksColumnID)
           .append("), UNIQUE (")
           .append(tableBlocksColumnBlock)
-          .append(")) DEFAULT CHARSET=utf8mb4");
+          .append("(128))) DEFAULT CHARSET=utf8mb4");
       createTableBlockCounts
           .append("CREATE TABLE IF NOT EXISTS ")
           .append(tableBlockCounts)
