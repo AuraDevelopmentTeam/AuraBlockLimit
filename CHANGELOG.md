@@ -1,3 +1,11 @@
+Version 1.1.0
+-------------
+
+\* Improved table schema to allow way longer block names.  
+   **This breaks your old tables!** Contact me if you need them migrated (no auto migration!!)! If you don't need any data migrated, make sure to *delete* the
+   tables (MySQL) or *delete* the database file (h2).  
+
+
 Version 1.0.3
 -------------
 
