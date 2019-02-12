@@ -1,3 +1,9 @@
+Version 1.1.1
+-------------
+
+\+ zsn741656478: Added zh_CN.lang  
+
+
 Version 1.1.0
 -------------
 
