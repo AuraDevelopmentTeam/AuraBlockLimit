@@ -134,7 +134,7 @@ public class AuraBlockLimit {
 
     translator =
         new MessagesTranslator(
-            new File(getConfigDir().toFile(), "lang"), config.getGeneral().getLanguage(), this);
+            new File(getConfigDir().toFile(), "lang"), config.getGeneral().getLanguage(), this, ID);
 
     dataSource = new DataSource();
     BlockCounter.setDataSource(dataSource);

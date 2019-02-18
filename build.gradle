@@ -5,7 +5,7 @@ repositories {
 }
 
 dependencies {
-    shadow("dev.aura.lib.messagestranslator:MessagesTranslator:${messagesTranslator_version}") {
+    shadowRelocate("dev.aura.lib.messagestranslator:MessagesTranslator:${messagesTranslator_version}") {
         transitive = false
     }
 }
