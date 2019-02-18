@@ -1,3 +1,9 @@
+Version 1.1.2
+-------------
+
+\* Updated MessagesTranslator to fix an issue with the wrong language files being loaded when multiple plugins were using it.    
+
+
 Version 1.1.1
 -------------
 
