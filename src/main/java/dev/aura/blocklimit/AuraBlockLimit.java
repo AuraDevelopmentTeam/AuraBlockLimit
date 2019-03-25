@@ -8,7 +8,6 @@ import dev.aura.blocklimit.counter.BlockCounter;
 import dev.aura.blocklimit.event.PlayerEvents;
 import dev.aura.blocklimit.permission.PermissionRegistry;
 import dev.aura.blocklimit.util.database.DataSource;
-import dev.aura.blocklimit.util.metrics.FeatureChart;
 import dev.aura.lib.messagestranslator.MessagesTranslator;
 import java.io.File;
 import java.io.IOException;
@@ -31,11 +30,8 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -148,10 +144,7 @@ public class AuraBlockLimit {
 
   @Listener
   public void reload(GameReloadEvent event) throws Exception {
-    Cause cause =
-        Cause.builder()
-            .append(this)
-            .build(EventContext.builder().add(EventContextKeys.PLUGIN, container).build());
+    Cause cause = Cause.builder().owner(this).build();
 
     // Unregistering everything
     GameStoppingEvent gameStoppingEvent = SpongeEventFactory.createGameStoppingEvent(cause);

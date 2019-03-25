@@ -8,7 +8,6 @@ import dev.aura.blocklimit.message.PluginMessages;
 import dev.aura.blocklimit.permission.PermissionRegistry;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.spongepowered.api.Sponge;
@@ -25,6 +24,7 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
@@ -92,8 +92,8 @@ public class CommandLimit implements CommandExecutor {
       final Optional<BlockState> blockState =
           player
               .getItemInHand(HandTypes.MAIN_HAND)
-              .filter(((Predicate<ItemStack>) ItemStack::isEmpty).negate())
-              .map(ItemStack::getType)
+              .filter(item -> (item.getItem() != ItemTypes.NONE) && (item.getQuantity() > 0))
+              .map(ItemStack::getItem)
               .flatMap(ItemType::getBlock)
               .map(BlockType::getDefaultState);
 

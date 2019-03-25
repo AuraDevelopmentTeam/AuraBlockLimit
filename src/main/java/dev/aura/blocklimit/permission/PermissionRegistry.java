@@ -37,7 +37,7 @@ public class PermissionRegistry {
   }
 
   private Builder getBuilder() {
-    return service.newDescriptionBuilder(plugin);
+    return service.newDescriptionBuilder(plugin).get();
   }
 
   private void registerPermission(String permission, String role) {
