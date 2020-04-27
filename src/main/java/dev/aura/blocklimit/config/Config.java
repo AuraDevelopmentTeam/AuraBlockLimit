@@ -22,10 +22,9 @@ public class Config {
     private boolean debug = false;
 
     @Setting(
-      comment =
-          "Select which language from the lang dir to use.\n"
-              + "You can add your own translations in there. If you name your file \"test.lang\", choose \"test\" here."
-    )
+        comment =
+            "Select which language from the lang dir to use.\n"
+                + "You can add your own translations in there. If you name your file \"test.lang\", choose \"test\" here.")
     @Getter
     private String language = "en_US";
   }
@@ -37,11 +36,10 @@ public class Config {
     private StorageEngine storageEngine = StorageEngine.h2;
 
     @Setting(
-      comment =
-          "If this is true blocks that do not have a limit set at all will not be stored in the database. You can still manually\n"
-              + "make this plugin ignore blocks by setting the limit to -2 (which means unlimited and dont't store) instead of just -1\n"
-              + "(which means unlimited)"
-    )
+        comment =
+            "If this is true blocks that do not have a limit set at all will not be stored in the database. You can still manually\n"
+                + "make this plugin ignore blocks by setting the limit to -2 (which means unlimited and dont't store) instead of just -1\n"
+                + "(which means unlimited)")
     @Getter
     private boolean ignoreUnset = true;
 
@@ -78,10 +76,9 @@ public class Config {
     @ConfigSerializable
     public static class H2 {
       @Setting(
-        comment =
-            "If this is a relative path, it will be relative to the AuraBlockLimit config dir (should be \"config/blocklimit\").\n"
-                + "Absolute paths work too of course"
-      )
+          comment =
+              "If this is a relative path, it will be relative to the AuraBlockLimit config dir (should be \"config/blocklimit\").\n"
+                  + "Absolute paths work too of course")
       @Getter
       private String databaseFile = "blockCounts";
 

@@ -10,6 +10,7 @@ import dev.aura.blocklimit.permission.PermissionRegistry;
 import dev.aura.blocklimit.util.database.DataSource;
 import dev.aura.blocklimit.util.metrics.FeatureChart;
 import dev.aura.lib.messagestranslator.MessagesTranslator;
+import dev.aura.lib.messagestranslator.PluginMessagesTranslator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -42,13 +43,12 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 
 @Plugin(
-  id = AuraBlockLimit.ID,
-  name = AuraBlockLimit.NAME,
-  version = AuraBlockLimit.VERSION,
-  description = AuraBlockLimit.DESCRIPTION,
-  url = AuraBlockLimit.URL,
-  authors = {AuraBlockLimit.AUTHOR}
-)
+    id = AuraBlockLimit.ID,
+    name = AuraBlockLimit.NAME,
+    version = AuraBlockLimit.VERSION,
+    description = AuraBlockLimit.DESCRIPTION,
+    url = AuraBlockLimit.URL,
+    authors = {AuraBlockLimit.AUTHOR})
 public class AuraBlockLimit {
   public static final String ID = "@id@";
   public static final String NAME = "@name@";
@@ -133,7 +133,7 @@ public class AuraBlockLimit {
     }
 
     translator =
-        new MessagesTranslator(
+        new PluginMessagesTranslator(
             new File(getConfigDir().toFile(), "lang"), config.getGeneral().getLanguage(), this, ID);
 
     dataSource = new DataSource();

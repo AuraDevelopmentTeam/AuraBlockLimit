@@ -88,8 +88,7 @@ public class BlockCounter {
 
     synchronized (playersToSave) {
       savingPlayers =
-          playersToSave
-              .stream()
+          playersToSave.stream()
               .map(Sponge.getServer()::getPlayer)
               .filter(Optional::isPresent)
               .map(Optional::get)

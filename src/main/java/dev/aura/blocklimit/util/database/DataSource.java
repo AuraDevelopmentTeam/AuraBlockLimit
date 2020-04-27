@@ -16,12 +16,11 @@ import lombok.Getter;
 import org.spongepowered.api.entity.living.player.Player;
 
 @SuppressFBWarnings(
-  value = {
-    "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-    "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"
-  },
-  justification = "The database name needs to be dynamic in order to allow prefixes"
-)
+    value = {
+      "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+      "SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"
+    },
+    justification = "The database name needs to be dynamic in order to allow prefixes")
 public class DataSource {
   private final DatabaseConnection connection;
   @Getter private final Config.Storage storageConfig;
