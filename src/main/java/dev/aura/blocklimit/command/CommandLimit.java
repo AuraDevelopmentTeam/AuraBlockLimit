@@ -47,7 +47,7 @@ public class CommandLimit implements CommandExecutor {
   public static void register(AuraBlockLimit plugin) {
     CommandSpec realTime =
         CommandSpec.builder()
-            .description(Text.of("Enables or disables synchronizing the world time with realtime."))
+            .description(Text.of("Shows the limit of the current block count."))
             .executor(new CommandLimit(plugin))
             .arguments(
                 GenericArguments.optional(
